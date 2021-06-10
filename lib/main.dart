@@ -1,5 +1,6 @@
 import 'package:doctor/pages/bottomnav.dart';
 import 'package:doctor/pages/login.dart';
+import 'package:doctor/pages/otpWidget.dart';
 import 'package:doctor/pages/signup.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +11,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-     return MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -19,7 +20,8 @@ class MyApp extends StatelessWidget {
       routes: {
         SignupWidget.signupRoute: (_) => SignupWidget(),
         LoginWidget.loginRoute: (_) => LoginWidget(),
-        BottomNavWidget.navRoute: (_) => BottomNavWidget()
+        BottomNavWidget.navRoute: (_) => BottomNavWidget(),
+        OtpWidget.OTPRoute: (_) => OtpWidget()
       },
     );
   }

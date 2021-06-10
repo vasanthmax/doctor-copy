@@ -1,10 +1,16 @@
+import 'package:doctor/pages/otpWidget.dart';
 import 'package:doctor/service/network.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'login.dart';
 
 class SignupWidget extends StatefulWidget {
   static const String signupRoute = '/signup';
+  final String currentCity;
+  final String currentState;
+
+  const SignupWidget({Key? key, this.currentCity = '', this.currentState = ''})
+      : super(key: key);
 
   @override
   _SignupWidgetState createState() => _SignupWidgetState();
@@ -19,18 +25,34 @@ class _SignupWidgetState extends State<SignupWidget> {
   late TextEditingController email;
   late TextEditingController phone;
   late TextEditingController password;
-  late Position _currentPosition;
+
+  DateTime currentDate = DateTime.now();
+  DateTime nowDate = DateTime.now();
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime pickedDate = (await showDatePicker(
+        context: context,
+        initialDate: currentDate,
+        firstDate: DateTime(1900),
+        lastDate: DateTime(2050)))!;
+    if (pickedDate != null && pickedDate != currentDate)
+      setState(() {
+        currentDate = pickedDate.toLocal();
+      });
+    int ageval = nowDate.year - currentDate.year;
+    age..text = ageval.toString();
+    dob..text = "${currentDate.year}-${currentDate.month}-${currentDate.day}";
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getCurrentLocation();
     username = TextEditingController();
     age = TextEditingController();
     dob = TextEditingController();
-    state = TextEditingController();
-    city = TextEditingController();
+    state = TextEditingController(text: widget.currentState);
+    city = TextEditingController(text: widget.currentCity);
     email = TextEditingController();
     phone = TextEditingController();
     password = TextEditingController();
@@ -38,8 +60,9 @@ class _SignupWidgetState extends State<SignupWidget> {
 
   @override
   Widget build(BuildContext context) {
+    setState(() {});
     double statusBarHeight = MediaQuery.of(context).padding.top;
-
+    print("${currentDate.year}-${currentDate.month}-${currentDate.day}");
     return Scaffold(
       body: Container(
           constraints: BoxConstraints(
@@ -161,6 +184,26 @@ class _SignupWidgetState extends State<SignupWidget> {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
+                            'DOB',
+                          ),
+                        ),
+                        TextContainer(
+                          child: TextField(
+                            controller: dob,
+                            style: TextStyle(fontSize: 20),
+                            decoration: InputDecoration(
+                                suffixIcon: IconButton(
+                                    icon: Icon(Icons.calendar_today),
+                                    onPressed: () {
+                                      _selectDate(context);
+                                    }),
+                                fillColor: Colors.white,
+                                border: InputBorder.none),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
                             'Age',
                           ),
                         ),
@@ -177,26 +220,12 @@ class _SignupWidgetState extends State<SignupWidget> {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'DOB',
-                          ),
-                        ),
-                        TextContainer(
-                          child: TextField(
-                            controller: dob,
-                            style: TextStyle(fontSize: 20),
-                            decoration: InputDecoration(
-                                fillColor: Colors.white,
-                                border: InputBorder.none),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
                             'City',
                           ),
                         ),
                         TextContainer(
                           child: TextField(
+                            readOnly: true,
                             controller: city,
                             style: TextStyle(fontSize: 20),
                             decoration: InputDecoration(
@@ -212,6 +241,7 @@ class _SignupWidgetState extends State<SignupWidget> {
                         ),
                         TextContainer(
                           child: TextField(
+                            readOnly: true,
                             controller: state,
                             style: TextStyle(fontSize: 20),
                             decoration: InputDecoration(
@@ -292,18 +322,60 @@ class _SignupWidgetState extends State<SignupWidget> {
                                   primary: Colors.transparent,
                                   shadowColor: Colors.transparent),
                               onPressed: () async {
+                                if (username.text.isEmpty ||
+                                    username.text.length < 3) {
+                                  Fluttertoast.showToast(
+                                      msg: "Enter a valid username");
+                                }
+                                if (dob.text.isEmpty) {
+                                  Fluttertoast.showToast(
+                                      msg: "Enter a valid date");
+                                }
+                                if (age.text.isEmpty) {
+                                  Fluttertoast.showToast(
+                                      msg: "Enter a valid age");
+                                }
+                                if (state.text.isEmpty) {
+                                  Fluttertoast.showToast(
+                                      msg:
+                                          "Enter a valid State or try turn on location");
+                                }
+                                if (city.text.isEmpty) {
+                                  Fluttertoast.showToast(
+                                      msg:
+                                          "Enter a valid city or try turn on location");
+                                }
+                                bool emailValid = RegExp(
+                                        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                    .hasMatch(email.text);
+                                if (email.text.isEmpty || emailValid == false) {
+                                  Fluttertoast.showToast(
+                                      msg: "Enter a valid email");
+                                }
+                                if (phone.text.isEmpty ||
+                                    phone.text.length < 10) {
+                                  Fluttertoast.showToast(
+                                      msg: "Enter a valid phone");
+                                }
+                                if (password.text.isEmpty ||
+                                    password.text.length < 6) {
+                                  Fluttertoast.showToast(
+                                      msg: "Enter a valid password");
+                                }
                                 bool success = await Network().signUp(
                                     username.text,
-                                    age.text,
+                                    int.parse(age.text),
                                     dob.text,
                                     city.text,
                                     state.text,
-                                    phone.text,
+                                    int.parse(phone.text),
                                     email.text,
                                     password.text);
 
                                 if (success) {
                                   print('otp reviced');
+                                  Navigator.pushNamed(
+                                      context, OtpWidget.OTPRoute);
                                 } else {
                                   print('otp not received');
                                 }
@@ -325,18 +397,5 @@ class _SignupWidgetState extends State<SignupWidget> {
             ],
           )),
     );
-  }
-
-  _getCurrentLocation() {
-    Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.best,
-            forceAndroidLocationManager: true)
-        .then((Position position) {
-      setState(() {
-        _currentPosition = position;
-      });
-    }).catchError((e) {
-      print(e);
-    });
   }
 }
