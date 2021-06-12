@@ -11,7 +11,7 @@ import 'package:geocoding/geocoding.dart';
 import 'signup.dart';
 
 class LoginWidget extends StatefulWidget {
-  static const String loginRoute = '/';
+  static const String loginRoute = '/login';
 
   @override
   _LoginWidgetState createState() => _LoginWidgetState();

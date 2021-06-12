@@ -1,7 +1,10 @@
+import 'package:doctor/main.dart';
 import 'package:doctor/pages/otpWidget.dart';
+import 'package:doctor/providers/signupValue.dart';
 import 'package:doctor/service/network.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 import 'login.dart';
 
 class SignupWidget extends StatefulWidget {
@@ -60,9 +63,7 @@ class _SignupWidgetState extends State<SignupWidget> {
 
   @override
   Widget build(BuildContext context) {
-    setState(() {});
     double statusBarHeight = MediaQuery.of(context).padding.top;
-    print("${currentDate.year}-${currentDate.month}-${currentDate.day}");
     return Scaffold(
       body: Container(
           constraints: BoxConstraints(
@@ -317,77 +318,90 @@ class _SignupWidgetState extends State<SignupWidget> {
                                 Color(0xffFC2A2A),
                                 Color(0xffFAAB4F),
                               ])),
-                          child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  primary: Colors.transparent,
-                                  shadowColor: Colors.transparent),
-                              onPressed: () async {
-                                if (username.text.isEmpty ||
-                                    username.text.length < 3) {
-                                  Fluttertoast.showToast(
-                                      msg: "Enter a valid username");
-                                }
-                                if (dob.text.isEmpty) {
-                                  Fluttertoast.showToast(
-                                      msg: "Enter a valid date");
-                                }
-                                if (age.text.isEmpty) {
-                                  Fluttertoast.showToast(
-                                      msg: "Enter a valid age");
-                                }
-                                if (state.text.isEmpty) {
-                                  Fluttertoast.showToast(
-                                      msg:
-                                          "Enter a valid State or try turn on location");
-                                }
-                                if (city.text.isEmpty) {
-                                  Fluttertoast.showToast(
-                                      msg:
-                                          "Enter a valid city or try turn on location");
-                                }
-                                bool emailValid = RegExp(
-                                        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                    .hasMatch(email.text);
-                                if (email.text.isEmpty || emailValid == false) {
-                                  Fluttertoast.showToast(
-                                      msg: "Enter a valid email");
-                                }
-                                if (phone.text.isEmpty ||
-                                    phone.text.length < 10) {
-                                  Fluttertoast.showToast(
-                                      msg: "Enter a valid phone");
-                                }
-                                if (password.text.isEmpty ||
-                                    password.text.length < 6) {
-                                  Fluttertoast.showToast(
-                                      msg: "Enter a valid password");
-                                }
-                                bool success = await Network().signUp(
-                                    username.text,
-                                    int.parse(age.text),
-                                    dob.text,
-                                    city.text,
-                                    state.text,
-                                    int.parse(phone.text),
-                                    email.text,
-                                    password.text);
+                          child: Consumer<UserDetails>(
+                            builder: (context, value, _) {
+                              return ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      primary: Colors.transparent,
+                                      shadowColor: Colors.transparent),
+                                  onPressed: () async {
+                                    if (username.text.isEmpty ||
+                                        username.text.length < 3) {
+                                      Fluttertoast.showToast(
+                                          msg: "Enter a valid username");
+                                    }
+                                    if (dob.text.isEmpty) {
+                                      Fluttertoast.showToast(
+                                          msg: "Enter a valid date");
+                                    }
+                                    if (age.text.isEmpty) {
+                                      Fluttertoast.showToast(
+                                          msg: "Enter a valid age");
+                                    }
+                                    if (state.text.isEmpty) {
+                                      Fluttertoast.showToast(
+                                          msg:
+                                              "Enter a valid State or try turn on location");
+                                    }
+                                    if (city.text.isEmpty) {
+                                      Fluttertoast.showToast(
+                                          msg:
+                                              "Enter a valid city or try turn on location");
+                                    }
+                                    bool emailValid = RegExp(
+                                            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                        .hasMatch(email.text);
+                                    if (email.text.isEmpty ||
+                                        emailValid == false) {
+                                      Fluttertoast.showToast(
+                                          msg: "Enter a valid email");
+                                    }
+                                    if (phone.text.isEmpty ||
+                                        phone.text.length < 10) {
+                                      Fluttertoast.showToast(
+                                          msg: "Enter a valid phone");
+                                    }
+                                    if (password.text.isEmpty ||
+                                        password.text.length < 6) {
+                                      Fluttertoast.showToast(
+                                          msg: "Enter a valid password");
+                                    }
+                                    value.setAge(int.parse(age.text));
+                                    value.setUsername(username.text);
+                                    value.setCity(city.text);
+                                    value.setState(state.text);
+                                    value.setEmail(email.text);
+                                    value.setPassword(password.text);
+                                    value.setPhone(int.parse(phone.text));
+                                    value.setDob(dob.text);
 
-                                if (success) {
-                                  print('otp reviced');
-                                  Navigator.pushNamed(
-                                      context, OtpWidget.OTPRoute);
-                                } else {
-                                  print('otp not received');
-                                }
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 30, vertical: 20),
-                                child: Text(
-                                  'Create',
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                              )),
+                                    bool success = await Network().signUp(
+                                        value.username,
+                                        value.age,
+                                        value.dob,
+                                        value.city,
+                                        value.state,
+                                        value.phone,
+                                        value.email,
+                                        value.password);
+
+                                    if (success) {
+                                      Navigator.pushNamed(
+                                          context, OtpWidget.OTPRoute);
+                                    } else {
+                                      print('otp not received');
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 30, vertical: 20),
+                                    child: Text(
+                                      'Create',
+                                      style: TextStyle(fontSize: 20),
+                                    ),
+                                  ));
+                            },
+                          ),
                         )
                       ],
                     ),

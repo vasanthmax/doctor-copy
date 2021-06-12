@@ -1,6 +1,8 @@
 import 'package:doctor/pages/bottomnav.dart';
+import 'package:doctor/providers/signupValue.dart';
 import 'package:doctor/service/network.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class OtpWidget extends StatefulWidget {
   static const String OTPRoute = '/verify';
@@ -122,19 +124,33 @@ class _OtpWidgetState extends State<OtpWidget> {
                         fontWeight: FontWeight.w300,
                         color: Colors.grey),
                   ),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shadowColor: Colors.transparent,
-                        primary: Colors.transparent,
-                      ),
-                      onPressed: () {},
-                      child: Text(
-                        'RESEND NOW',
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xffF05f5f)),
-                      ))
+                  Consumer<UserDetails>(
+                    builder: (context, value, _) {
+                      return ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            shadowColor: Colors.transparent,
+                            primary: Colors.transparent,
+                          ),
+                          onPressed: () async {
+                            await Network().signUp(
+                                value.username,
+                                value.age,
+                                value.dob,
+                                value.city,
+                                value.state,
+                                value.phone,
+                                value.email,
+                                value.password);
+                          },
+                          child: Text(
+                            'RESEND NOW',
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xffF05f5f)),
+                          ));
+                    },
+                  )
                 ],
               ),
             )
